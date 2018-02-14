@@ -5,6 +5,10 @@ using namespace std;
 void upd() {
 
 
+	// List of samples that should be changed
+	// I would suggest to test a small one first and copy it before doing
+	// so to avoid possible damage
+	
 	vector<string> sampleNameList;
 	sampleNameList.push_back("sw8026v1001.processed.4T_aMCatNLO_FXFX_Summer16_25ns.root");
 	sampleNameList.push_back("sw8026v1001.processed.AStar_aMCatNLO_Summer16_25ns.root");
@@ -54,7 +58,7 @@ void upd() {
 	//~ sampleNameList.push_back("sw8026v1001.processed.T6bbllslepton_msbottom_1200_mneutralino_200.root");
 	//~ sampleNameList.push_back("sw8026v1001.processed.T6bbllslepton_msbottom_1200_mneutralino_1000.root");
 
-	
+	//Root files containing scale factors from https://twiki.cern.ch/twiki/bin/viewauth/CMS/SUSLeptonSF
 	TFile *electronScaleFactorFile = new TFile("../ScaleFactorsElectrons.root");							
 	electronScaleFactorFile->ls();
 	TH2F * electronIDScaleFactorHisto = (TH2F*)electronScaleFactorFile->Get("GsfElectronToMVATightTightIP2DSIP3D4");
@@ -86,6 +90,8 @@ void upd() {
 	//~ TH1F * muonTrackScaleFactorEtaHistoInput = (TH1F*)muonTrackScaleFactorEtaGraph->GetHistogram();
 	//~ TH1F * muonTrackScaleFactorVtxHisto = (TH1F*)muonTrackScaleFactorVtxGraph->GetHistogram();
 	
+	// Unfortunately there was no root file for muon track scale factors and
+	// I had to fetch them by eye from a histogram
 	TH1F * muonTrackScaleFactorEtaHisto = new TH1F("muonTrackScaleFactorEtaHisto","muonTrackScaleFactorEta",12,0.,2.4);
 	TH1F * muonTrackScaleFactorVtxHisto = new TH1F("muonTrackScaleFactorVtxHisto","muonTrackScaleFactorVtx",23,0.,46);
 	
@@ -147,7 +153,9 @@ void upd() {
 	
 	TFile *FastSimMuonSIP3DScaleFactorFile = new TFile("../FastSimScaleFactorMuonSIP3D.root");
 	TH2D * FastSimMuonSIP3DScaleFactorHisto = (TH2D*)FastSimMuonSIP3DScaleFactorFile->Get("histo2D");
-			
+	
+	
+	// FastSim stuff is only relevant for signal, therefore commented out now		
 	float leptonFullSimScaleFactor1,leptonFullSimScaleFactor2;
 	float leptonFullSimScaleFactorErr1,leptonFullSimScaleFactorErr2;
 	//~ float leptonFastSimScaleFactor1,leptonFastSimScaleFactor2;
@@ -156,10 +164,9 @@ void upd() {
 	float diMuPt1,diMuPt2,diMuEta1,diMuEta2;
 	float diElePt1,diElePt2,diEleEta1,diEleEta2;
 	float EMuPt1,EMuPt2,EMuEta1,EMuEta2;
-	float diEleIdEff1,diEleIdEff2;
-	//~ float diMuIdEff1,diMuIdEff2;
-	//~ float EMuIdEff1,EMuIdEff2;
 	
+	// In some samples (signal?) the type of the integers was different
+	// Not sure if it might still be relevant
 	int diEleHBHENoiseFilter,diEleHBHENoiseIsoFilter,diEleCSCTightHaloFilter,diEleGoodVertices,diEleEcalDeadCellTriggerPrimitiveFilter,diEleEEBadScFilter;
 	int diMuHBHENoiseFilter,diMuHBHENoiseIsoFilter,diMuCSCTightHaloFilter,diMuGoodVertices,diMuEcalDeadCellTriggerPrimitiveFilter,diMuEEBadScFilter;
 	int EMuHBHENoiseFilter,EMuHBHENoiseIsoFilter,EMuCSCTightHaloFilter,EMuGoodVertices,EMuEcalDeadCellTriggerPrimitiveFilter,EMuEEBadScFilter;
@@ -184,7 +191,9 @@ void upd() {
 		sampleName = (*fname).c_str();
 		TFile *f = new TFile((*fname).c_str(),"update");
 		f->cd("cutsV34DileptonFinalTrees");
-				
+		
+		// For every dilepton combination different combinations of
+		// scale factors and triggers are relevant		
 		TTree *DiElectronTree = (TTree*)gDirectory->Get("EEDileptonTree");
 		
 		TBranch *diElectronFullSimScaleFactor1Branch = DiElectronTree->Branch("leptonFullSimScaleFactor1",&leptonFullSimScaleFactor1,"leptonFullSimScaleFactor1/F");
@@ -230,6 +239,8 @@ void upd() {
 				//~ leptonFastSimScaleFactorErr1 = 0.;
 				//~ leptonFastSimScaleFactorErr2 = 0.;
 				
+				// In some cases the overflow bin is empty and
+				// one gets a 0 back ...
 				if (diElePt1 > 200.) tempPt = 199.;
 				else tempPt = diElePt1;
 				if (diElePt1 > 500.)tempPtTrack = 499.;
